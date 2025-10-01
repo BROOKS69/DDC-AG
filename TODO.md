@@ -47,3 +47,7 @@
 - Update README.md with project overview, setup, deployment steps
 - Explain content updates for non-technical staff
 
+Implementing reverse proxy setup instructions for unified port access.
+Thorough testing of backend and frontend.
+Admin dashboard implementation.
+Deployment configuration and documentation.
