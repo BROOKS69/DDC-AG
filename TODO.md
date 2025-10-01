@@ -14,6 +14,7 @@
 - [x] Set up routing
 - [x] Fix routing issues (remove duplicate app directory)
 - [x] Start development server successfully
+- [x] Create all core pages with responsive design
 
 ## Step 3: Scaffold FastAPI Backend
 - [x] Initialize FastAPI app in `backend/`
@@ -21,6 +22,7 @@
 - [x] Create models for MongoDB
 - [x] Set up CORS, middleware
 - [x] Fix Pydantic v2 compatibility issues
+- [x] Test all API endpoints (GET, POST working; auth-protected routes return 403 as expected)
 
 ## Step 4: Implement Database Schemas
 - Define MongoDB schemas for events, sermons, users, etc.

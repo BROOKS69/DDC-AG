@@ -13,7 +13,7 @@ class PyObjectId(ObjectId):
         yield cls.validate
 
     @classmethod
-    def validate(cls, v):
+    def validate(cls, v, field=None, config=None):
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid objectid")
         return ObjectId(v)
@@ -45,8 +45,8 @@ async def get_news():
 @router.post("/", response_model=NewsModel)
 async def create_news(news: NewsModel):
     db = get_database()
-    news = jsonable_encoder(news)
-    new_news = await db.news.insert_one(news)
+    news_dict = news.dict(by_alias=True)
+    new_news = await db.news.insert_one(news_dict)
     created_news = await db.news.find_one({"_id": new_news.inserted_id})
     return created_news
 
