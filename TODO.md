@@ -43,21 +43,14 @@
 - [x] Explain content updates for non-technical staff
 
 
-Next Steps
-Set up Supabase project and MongoDB Atlas cluster
-Update environment variables in .env files
-Run backend: uvicorn backend.main:app --reload
-Run frontend: npm run dev in frontend/
-Access admin at /admin to manage content
 
 Frontend Testing:
-
 Page loading and navigation (Landing, About, Sermons, Events, Contact, Blog)
 Admin login functionality and route protection
 Form submissions in admin dashboard (sermons management)
 Responsive design on mobile/desktop
-Backend Testing:
 
+Backend Testing:
 API endpoints for CRUD operations (sermons, events, news, donations, users)
 Authentication routes (login, register, logout)
 Database connections and data persistence

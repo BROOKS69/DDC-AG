@@ -12,11 +12,13 @@ security = HTTPBearer()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+def get_supabase_client():
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:
+        supabase = get_supabase_client()
         user = supabase.auth.get_user(token)
         return user
     except Exception as e:
@@ -25,6 +27,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 @router.post("/login")
 async def login(email: str, password: str):
     try:
+        supabase = get_supabase_client()
         response = supabase.auth.sign_in_with_password({"email": email, "password": password})
         return {"access_token": response.session.access_token, "user": response.user}
     except Exception as e:
@@ -33,6 +36,7 @@ async def login(email: str, password: str):
 @router.post("/register")
 async def register(email: str, password: str):
     try:
+        supabase = get_supabase_client()
         response = supabase.auth.sign_up({"email": email, "password": password})
         return {"message": "User registered", "user": response.user}
     except Exception as e:
@@ -41,6 +45,7 @@ async def register(email: str, password: str):
 @router.post("/logout")
 async def logout(current_user = Depends(get_current_user)):
     try:
+        supabase = get_supabase_client()
         supabase.auth.sign_out()
         return {"message": "Logged out"}
     except Exception as e:

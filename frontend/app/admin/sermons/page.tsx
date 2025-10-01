@@ -1,171 +1,81 @@
 'use client'
 
-import { useAuth } from '../../../contexts/AuthContext'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, FormEvent } from 'react'
 
 interface Sermon {
-  _id: string
+  id: number
   title: string
-  speaker: string
-  date: string
   summary: string
-  audio_url?: string
+  audioUrl: string
 }
 
-export default function AdminSermonsPage() {
-  const { user } = useAuth()
-  const router = useRouter()
+export default function AdminSermons() {
   const [sermons, setSermons] = useState<Sermon[]>([])
-  const [formData, setFormData] = useState({
-    title: '',
-    speaker: '',
-    date: '',
-    summary: '',
-    audio_url: '',
-  })
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [title, setTitle] = useState('')
+  const [summary, setSummary] = useState('')
+  const [audioUrl, setAudioUrl] = useState('')
 
   useEffect(() => {
-    if (!user) {
-      router.push('/admin')
-      return
-    }
-    fetchSermons()
-  }, [user, router])
+    // TODO: Fetch sermons from backend API
+    setSermons([
+      { id: 1, title: 'Faith and Hope', summary: 'A sermon about faith.', audioUrl: '/sermons/faith-and-hope.mp3' },
+    ])
+  }, [])
 
-  const fetchSermons = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sermons`)
-    const data = await res.json()
-    setSermons(data)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAddSermon = (e: FormEvent) => {
     e.preventDefault()
-    const method = editingId ? 'PUT' : 'POST'
-    const url = editingId
-      ? `${process.env.NEXT_PUBLIC_API_URL}/sermons/${editingId}`
-      : `${process.env.NEXT_PUBLIC_API_URL}/sermons`
-
-    const res = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${user?.id}`, // Assuming token is user.id or get from session
-      },
-      body: JSON.stringify(formData),
-    })
-
-    if (res.ok) {
-      fetchSermons()
-      setFormData({ title: '', speaker: '', date: '', summary: '', audio_url: '' })
-      setEditingId(null)
-    }
+    // TODO: Post new sermon to backend API
+    const newSermon: Sermon = { id: Date.now(), title, summary, audioUrl }
+    setSermons([...sermons, newSermon])
+    setTitle('')
+    setSummary('')
+    setAudioUrl('')
   }
-
-  const handleEdit = (sermon: Sermon) => {
-    setFormData({
-      title: sermon.title,
-      speaker: sermon.speaker,
-      date: sermon.date,
-      summary: sermon.summary,
-      audio_url: sermon.audio_url || '',
-    })
-    setEditingId(sermon._id)
-  }
-
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sermons/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${user?.id}`,
-      },
-    })
-    if (res.ok) {
-      fetchSermons()
-    }
-  }
-
-  if (!user) return null
 
   return (
-    <section className="py-12">
+    <section className="max-w-4xl mx-auto py-12 px-4">
       <h2 className="text-3xl font-bold mb-6">Manage Sermons</h2>
-      <form onSubmit={handleSubmit} className="mb-8 space-y-4">
+      <form onSubmit={handleAddSermon} className="mb-8 space-y-4 max-w-md">
         <div>
-          <label className="block font-semibold mb-1">Title</label>
+          <label className="block mb-1">Title</label>
           <input
             type="text"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded p-2"
           />
         </div>
         <div>
-          <label className="block font-semibold mb-1">Speaker</label>
-          <input
-            type="text"
-            value={formData.speaker}
-            onChange={(e) => setFormData({ ...formData, speaker: e.target.value })}
-            required
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="block font-semibold mb-1">Date</label>
-          <input
-            type="date"
-            value={formData.date}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            required
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="block font-semibold mb-1">Summary</label>
+          <label className="block mb-1">Summary</label>
           <textarea
-            value={formData.summary}
-            onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+            value={summary}
+            onChange={(e) => setSummary(e.target.value)}
             required
-            rows={4}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded p-2"
+            rows={3}
           />
         </div>
         <div>
-          <label className="block font-semibold mb-1">Audio URL</label>
+          <label className="block mb-1">Audio URL</label>
           <input
-            type="url"
-            value={formData.audio_url}
-            onChange={(e) => setFormData({ ...formData, audio_url: e.target.value })}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            type="text"
+            value={audioUrl}
+            onChange={(e) => setAudioUrl(e.target.value)}
+            required
+            className="w-full border border-gray-300 rounded p-2"
           />
         </div>
-        <button type="submit" className="bg-blue-700 text-white px-6 py-3 rounded hover:bg-blue-800">
-          {editingId ? 'Update Sermon' : 'Add Sermon'}
+        <button type="submit" className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">
+          Add Sermon
         </button>
       </form>
       <ul>
         {sermons.map((sermon) => (
-          <li key={sermon._id} className="mb-4 border-b pb-4 flex justify-between items-center">
-            <div>
-              <h3 className="text-xl font-semibold">{sermon.title}</h3>
-              <p>By {sermon.speaker} on {new Date(sermon.date).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <button
-                onClick={() => handleEdit(sermon)}
-                className="mr-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(sermon._id)}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
+          <li key={sermon.id} className="mb-6 border-b border-gray-200 pb-4">
+            <h3 className="text-xl font-semibold">{sermon.title}</h3>
+            <p>{sermon.summary}</p>
+            <audio controls src={sermon.audioUrl} className="w-full mt-2" />
           </li>
         ))}
       </ul>
