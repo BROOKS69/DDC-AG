@@ -1,104 +1,80 @@
 import Image from "next/image";
 import Link from "next/link";
+import Header from "../components/Header";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Welcome to Our Church
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Join our community in faith, fellowship, and service. Experience God's love through worship, learning, and outreach.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/about"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Header */}
+      <Header />
+
+      {/* Main Content */}
+      <main>
+        {/* Hero Section */}
+        <section className="relative bg-cover bg-center h-96" style={{ backgroundImage: "url('/hero-image.jpg')" }}>
+          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+            <div className="text-white">
+              <h1 className="text-5xl font-bold mb-4">Welcome to Our Church</h1>
+              <p className="text-xl mb-8">Join us in worship and community</p>
+              <Link href="/about" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md text-lg font-medium">
                 Learn More
               </Link>
-              <Link
-                href="/contact"
-                className="bg-gray-200 text-gray-800 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
-              >
-                Contact Us
-              </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Photo Gallery Section */}
-      <section className="py-16 bg-gray-100">
+        {/* Mission Section */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">Our Mission</h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                To spread the word of God, build a loving community, and serve those in need.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="py-16 bg-blue-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">Join Us This Sunday</h2>
+            <p className="text-xl text-blue-100 mb-8">Service at 10:00 AM</p>
+            <Link href="/events" className="bg-white text-blue-600 px-6 py-3 rounded-md text-lg font-medium hover:bg-gray-100">
+              View Events
+            </Link>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Our Community
-          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-              <Image
-                src="/placeholder-church1.jpg"
-                alt="Church service"
-                width={400}
-                height={300}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">Sunday Worship</h3>
-                <p className="text-gray-600">Join us for inspiring worship services every Sunday.</p>
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Church Name</h3>
+              <p className="text-gray-300">123 Church Street<br />City, State 12345</p>
             </div>
-            <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-              <Image
-                src="/placeholder-church2.jpg"
-                alt="Community outreach"
-                width={400}
-                height={300}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">Community Outreach</h3>
-                <p className="text-gray-600">Serving our community through various outreach programs.</p>
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                <li><Link href="/about" className="text-gray-300 hover:text-white">About</Link></li>
+                <li><Link href="/sermons" className="text-gray-300 hover:text-white">Sermons</Link></li>
+                <li><Link href="/events" className="text-gray-300 hover:text-white">Events</Link></li>
+                <li><Link href="/contact" className="text-gray-300 hover:text-white">Contact</Link></li>
+              </ul>
             </div>
-            <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-              <Image
-                src="/placeholder-church3.jpg"
-                alt="Youth ministry"
-                width={400}
-                height={300}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">Youth Ministry</h3>
-                <p className="text-gray-600">Growing faith in our young people through engaging activities.</p>
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
+              <p className="text-gray-300">Phone: (123) 456-7890<br />Email: info@church.com</p>
             </div>
           </div>
+          <div className="mt-8 pt-8 border-t border-gray-700 text-center">
+            <p className="text-gray-300">&copy; 2023 Church Name. All rights reserved.</p>
+          </div>
         </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-16 bg-blue-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Join Our Community?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Visit us this Sunday or get in touch to learn more about our church family.
-          </p>
-          <Link
-            href="/contact"
-            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Get Connected
-          </Link>
-        </div>
-      </section>
+      </footer>
     </div>
   );
 }

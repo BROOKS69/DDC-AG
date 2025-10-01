@@ -12,51 +12,36 @@
 - [x] Create page components: Landing, About, Sermons, Events, Contact, Blog
 - [x] Create reusable components (Header, Footer, etc.)
 - [x] Set up routing
+- [x] Fix routing issues (remove duplicate app directory)
+- [x] Start development server successfully
 
 ## Step 3: Scaffold FastAPI Backend
 - [x] Initialize FastAPI app in `backend/`
 - [x] Set up routers for sermons, events, news, donations, users
 - [x] Create models for MongoDB
 - [x] Set up CORS, middleware
+- [x] Fix Pydantic v2 compatibility issues
 
 ## Step 4: Implement Database Schemas
-- [x] Define MongoDB schemas for events, sermons, users, etc.
-- [x] Create connection utilities
+- Define MongoDB schemas for events, sermons, users, etc.
+- Create connection utilities
 
 ## Step 5: Integrate Supabase Auth
-- [x] Set up Supabase client in frontend and backend
-- [x] Implement authentication routes
-- [x] Protect admin routes
+- Set up Supabase client in frontend and backend
+- Implement authentication routes
+- Protect admin routes
 
 ## Step 6: Implement Admin Dashboard
-- [x] Create admin pages in Next.js
-- [x] Forms for managing content
-- [x] Integrate with backend APIs
+- Create admin pages in Next.js
+- Forms for managing content
+- Integrate with backend APIs
 
 ## Step 7: Provide Deployment Configs
-- [x] Create vercel.json for Vercel deployment
-- [x] Set up Supabase configs
-- [x] Instructions for MongoDB Atlas
+- Create vercel.json for Vercel deployment
+- Set up Supabase configs
+- Instructions for MongoDB Atlas
 
 ## Step 8: Update README and Documentation
-- [x] Update README.md with project overview, setup, deployment steps
-- [x] Explain content updates for non-technical staff
+- Update README.md with project overview, setup, deployment steps
+- Explain content updates for non-technical staff
 
-
-
-Frontend Testing:
-Page loading and navigation (Landing, About, Sermons, Events, Contact, Blog)
-Admin login functionality and route protection
-Form submissions in admin dashboard (sermons management)
-Responsive design on mobile/desktop
-
-Backend Testing:
-API endpoints for CRUD operations (sermons, events, news, donations, users)
-Authentication routes (login, register, logout)
-Database connections and data persistence
-CORS and middleware functionality
-Integration Testing:
-
-Frontend-backend communication
-Supabase Auth integration
-MongoDB data flow
