@@ -1,49 +1,67 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from typing import List, Optional
+from fastapi import APIRouter, HTTPException
+from typing import List
+from pydantic import BaseModel, Field
+from bson import ObjectId
 from database import get_database
-from routers.auth import get_current_user
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()
 
-class News(BaseModel):
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid objectid")
+        return ObjectId(v)
+
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")
+
+class NewsModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     title: str
-    content: str
-    author: str
     date: str
-    image_url: Optional[str] = None
+    content: str
 
-db = get_database()
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
 
-@router.get("/", response_model=List[News])
+@router.get("/", response_model=List[NewsModel])
 async def get_news():
+    db = get_database()
     news = await db.news.find().to_list(100)
     return news
 
-@router.get("/{news_id}", response_model=News)
-async def get_news_item(news_id: str):
-    news_item = await db.news.find_one({"_id": news_id})
-    if not news_item:
-        raise HTTPException(status_code=404, detail="News item not found")
-    return news_item
+@router.post("/", response_model=NewsModel)
+async def create_news(news: NewsModel):
+    db = get_database()
+    news = jsonable_encoder(news)
+    new_news = await db.news.insert_one(news)
+    created_news = await db.news.find_one({"_id": new_news.inserted_id})
+    return created_news
 
-@router.post("/", response_model=News)
-async def create_news(news: News, current_user = Depends(get_current_user)):
-    news_dict = news.dict()
-    result = await db.news.insert_one(news_dict)
-    news_dict["_id"] = str(result.inserted_id)
-    return news_dict
-
-@router.put("/{news_id}", response_model=News)
-async def update_news(news_id: str, news: News, current_user = Depends(get_current_user)):
-    result = await db.news.update_one({"_id": news_id}, {"$set": news.dict()})
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="News item not found")
-    return news
+@router.put("/{news_id}", response_model=NewsModel)
+async def update_news(news_id: str, news: NewsModel):
+    db = get_database()
+    news = jsonable_encoder(news)
+    update_result = await db.news.update_one({"_id": ObjectId(news_id)}, {"$set": news})
+    if update_result.modified_count == 1:
+        updated_news = await db.news.find_one({"_id": ObjectId(news_id)})
+        if updated_news:
+            return updated_news
+    raise HTTPException(status_code=404, detail=f"News {news_id} not found")
 
 @router.delete("/{news_id}")
-async def delete_news(news_id: str, current_user = Depends(get_current_user)):
-    result = await db.news.delete_one({"_id": news_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="News item not found")
-    return {"message": "News item deleted"}
+async def delete_news(news_id: str):
+    db = get_database()
+    delete_result = await db.news.delete_one({"_id": ObjectId(news_id)})
+    if delete_result.deleted_count == 1:
+        return {"message": f"News {news_id} deleted"}
+    raise HTTPException(status_code=404, detail=f"News {news_id} not found")

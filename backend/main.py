@@ -8,7 +8,7 @@ app = FastAPI(title="Church Website API", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://your-vercel-domain.vercel.app"],  # Update with your frontend URL
+    allow_origins=["http://localhost:3000", "https://ddc-ag.vercel.app/"],  # Update with your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

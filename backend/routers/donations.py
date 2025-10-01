@@ -1,35 +1,58 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
 from typing import List
+from pydantic import BaseModel, Field
+from bson import ObjectId
 from database import get_database
-from routers.auth import get_current_user
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()
 
-class Donation(BaseModel):
-    amount: float
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid objectid")
+        return ObjectId(v)
+
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")
+
+class DonationModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     donor_name: str
-    donor_email: str
-    message: str = ""
+    amount: float
     date: str
 
-db = get_database()
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
 
-@router.get("/", response_model=List[Donation])
-async def get_donations(current_user = Depends(get_current_user)):
+@router.get("/", response_model=List[DonationModel])
+async def get_donations():
+    db = get_database()
     donations = await db.donations.find().to_list(100)
     return donations
 
-@router.post("/", response_model=Donation)
-async def create_donation(donation: Donation):
-    donation_dict = donation.dict()
-    result = await db.donations.insert_one(donation_dict)
-    donation_dict["_id"] = str(result.inserted_id)
-    return donation_dict
+@router.post("/", response_model=DonationModel)
+async def create_donation(donation: DonationModel):
+    db = get_database()
+    donation = jsonable_encoder(donation)
+    new_donation = await db.donations.insert_one(donation)
+    created_donation = await db.donations.find_one({"_id": new_donation.inserted_id})
+    return created_donation
 
 @router.get("/total")
-async def get_total_donations(current_user = Depends(get_current_user)):
-    pipeline = [{"$group": {"_id": None, "total": {"$sum": "$amount"}}}]
-    result = await db.donations.aggregate(pipeline).to_list(1)
+async def get_total_donations():
+    db = get_database()
+    pipeline = [
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]
+    result = await db.donations.aggregate(pipeline).to_list(length=1)
     total = result[0]["total"] if result else 0
-    return {"total": total}
+    return {"total_donations": total}

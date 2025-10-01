@@ -1,47 +1,67 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
 from typing import List
+from pydantic import BaseModel, Field, EmailStr
+from bson import ObjectId
 from database import get_database
-from routers.auth import get_current_user
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()
 
-class User(BaseModel):
-    email: str
-    name: str
-    role: str = "member"  # member, admin
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
 
-db = get_database()
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid objectid")
+        return ObjectId(v)
 
-@router.get("/", response_model=List[User])
-async def get_users(current_user = Depends(get_current_user)):
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")
+
+class UserModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    email: EmailStr
+    full_name: str
+    is_admin: bool = False
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+@router.get("/", response_model=List[UserModel])
+async def get_users():
+    db = get_database()
     users = await db.users.find().to_list(100)
     return users
 
-@router.get("/{user_id}", response_model=User)
-async def get_user(user_id: str, current_user = Depends(get_current_user)):
-    user = await db.users.find_one({"_id": user_id})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+@router.post("/", response_model=UserModel)
+async def create_user(user: UserModel):
+    db = get_database()
+    user = jsonable_encoder(user)
+    new_user = await db.users.insert_one(user)
+    created_user = await db.users.find_one({"_id": new_user.inserted_id})
+    return created_user
 
-@router.post("/", response_model=User)
-async def create_user(user: User, current_user = Depends(get_current_user)):
-    user_dict = user.dict()
-    result = await db.users.insert_one(user_dict)
-    user_dict["_id"] = str(result.inserted_id)
-    return user_dict
-
-@router.put("/{user_id}", response_model=User)
-async def update_user(user_id: str, user: User, current_user = Depends(get_current_user)):
-    result = await db.users.update_one({"_id": user_id}, {"$set": user.dict()})
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+@router.put("/{user_id}", response_model=UserModel)
+async def update_user(user_id: str, user: UserModel):
+    db = get_database()
+    user = jsonable_encoder(user)
+    update_result = await db.users.update_one({"_id": ObjectId(user_id)}, {"$set": user})
+    if update_result.modified_count == 1:
+        updated_user = await db.users.find_one({"_id": ObjectId(user_id)})
+        if updated_user:
+            return updated_user
+    raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
 @router.delete("/{user_id}")
-async def delete_user(user_id: str, current_user = Depends(get_current_user)):
-    result = await db.users.delete_one({"_id": user_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"message": "User deleted"}
+async def delete_user(user_id: str):
+    db = get_database()
+    delete_result = await db.users.delete_one({"_id": ObjectId(user_id)})
+    if delete_result.deleted_count == 1:
+        return {"message": f"User {user_id} deleted"}
+    raise HTTPException(status_code=404, detail=f"User {user_id} not found")
